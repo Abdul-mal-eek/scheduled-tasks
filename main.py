@@ -22,9 +22,10 @@ import datetime as dt
 import pandas
 import random
 import smtplib
+import os
 
-MY_EMAIL = "abdulmaleek859@gmail.com"
-PASSWORD = "ggjg pcil jgpt ixcz"
+MY_EMAIL = os.environ.get("MY_EMAIL")
+PASSWORD = os.environ.get("PASSWORD")
 
 #Get today's date
 today = dt.datetime.now()
