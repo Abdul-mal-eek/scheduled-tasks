@@ -1,38 +1,82 @@
-# To run and test the code you need to update 4 places:
-# 1. Change MY_EMAIL/MY_PASSWORD to your own details.
-# 2. Go to your email provider and make it allow less secure apps.
-# 3. Update the SMTP ADDRESS to match your email provider.
-# 4. Update birthdays.csv to contain today's month and day.
-# See the solution video in the 100 Days of Python Course for explainations.
+##################### Hard Starting Project ######################
 
+# 1. Update the birthdays.csv with your friends & family's details.
+# HINT: Make sure one of the entries matches today's date for testing purposes.
 
-from datetime import datetime
+# 2. Check if today matches a birthday in the birthdays.csv
+# HINT 1: Only the month and day matter.
+# HINT 2: You could create a dictionary from birthdays.csv that looks like this:
+# birthdays_dict = {
+#     (month, day): data_row
+# }
+#HINT 3: Then you could compare and see if today's month/day matches one of the keys in birthday_dict like this:
+# if (today_month, today_day) in birthdays_dict:
+
+# 3. If step 2 is true, pick a random letter from letter templates and replace the [NAME] with the person's actual name from birthdays.csv
+# HINT: https://www.w3schools.com/python/ref_string_replace.asp
+
+# 4. Send the letter generated in step 3 to that person's email address.
+# HINT: Gmail(smtp.gmail.com), Yahoo(smtp.mail.yahoo.com), Hotmail(smtp.live.com), Outlook(smtp-mail.outlook.com)
+
+import datetime as dt
 import pandas
 import random
 import smtplib
-import os
 
-# import os and use it to get the Github repository secrets
-MY_EMAIL = os.environ.get("MY_EMAIL")
-MY_PASSWORD = os.environ.get("MY_PASSWORD")
+MY_EMAIL = "abdulmaleek859@gmail.com"
+PASSWORD = "ggjg pcil jgpt ixcz"
 
-today = datetime.now()
+#Get today's date
+today = dt.datetime.now()
+print(today)
+#today_formatted = today.strftime("%A, %B %d, %Y %H:%M:%S")
+
 today_tuple = (today.month, today.day)
 
+#Read birthdays.csv
 data = pandas.read_csv("birthdays.csv")
-birthdays_dict = {(data_row["month"], data_row["day"])                  : data_row for (index, data_row) in data.iterrows()}
+
+#Convert the birthday data into a dictionary
+birthdays_dict = {
+    (row["month"], row["day"]): row for (index, row) in data.iterrows()
+}
+#print(birthdays_dict)
+
+#Check if today matches anyone's birthay
 if today_tuple in birthdays_dict:
     birthday_person = birthdays_dict[today_tuple]
-    file_path = f"letter_templates/letter_{random.randint(1, 3)}.txt"
-    with open(file_path) as letter_file:
-        contents = letter_file.read()
-        contents = contents.replace("[NAME]", birthday_person["name"])
 
-    with smtplib.SMTP("YOUR EMAIL PROVIDER SMTP SERVER ADDRESS") as connection:
+    #Get the person's name and email
+    name = birthday_person["name"]
+    email = birthday_person["email"]
+    #OR
+    #name = birthdays_dict[(11, 13)]["name"]
+    #email = birthdays_dict[11, 13]["email"]
+
+    random_letter = random.choice([
+        "letter_templates/letter_1.txt",
+        "letter_templates/letter_2.txt",
+        "letter_templates/letter_3.txt",
+    ])
+
+    #Read the selected letter
+    with open(random_letter) as letter_file:
+        letter_contents = letter_file.read()
+
+    letter_contents= letter_contents.replace("[NAME]", name)
+
+    #Send the birthday email
+    with smtplib.SMTP("smtp.gmail.com", 587) as connection:
         connection.starttls()
-        connection.login(MY_EMAIL, MY_PASSWORD)
+        connection.login(MY_EMAIL, PASSWORD)
+
         connection.sendmail(
             from_addr=MY_EMAIL,
-            to_addrs=birthday_person["email"],
-            msg=f"Subject:Happy Birthday!\n\n{contents}"
+            to_addrs=email,
+            msg=f"Subject: Happy Birthday!\n\n{letter_contents}"
         )
+    print(f"Birthday message sent to{name}")
+
+else:
+    print("No birthdays today")
+
